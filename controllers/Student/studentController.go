@@ -1,7 +1,6 @@
 package studentController
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -99,16 +98,33 @@ func PutStudent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "ID inválido",
 		})
+
+		return
 	}
 
-	for _, student := range Students {
+	for index, student := range Students {
 		if student.ID == id {
-			student = reqStudent
-			fmt.Println("-------", reqStudent)
-			fmt.Println("-------", student)
+
+			if reqStudent.Name != "" {
+				Students[index].Name = reqStudent.Name
+			}
+			if reqStudent.Age != 0 {
+				Students[index].Age = reqStudent.Age
+			}
+			if len(reqStudent.Classes) > 0 {
+				Students[index].Classes = reqStudent.Classes
+			}
+			if reqStudent.Course != "" {
+				Students[index].Course = reqStudent.Course
+			}
+
+			c.JSON(http.StatusOK, Students)
+			return
 		}
 	}
 
-	c.JSON(http.StatusOK, Students)
+	c.JSON(http.StatusNotFound, gin.H{
+		"message": "Estudante não encontrado",
+	})
 
 }
