@@ -1,19 +1,36 @@
 package studentController
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
+	config "student_api/config/DB"
 	studentModel "student_api/models/Student"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"gorm.io/gorm"
 )
 
 var Students []studentModel.Student
 
 func GetStudents(c *gin.Context) {
-	c.JSON(http.StatusOK, Students)
+	db := config.DBConnection()
+	var students []studentModel.Student
+	result := db.Find(&students)
+
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": result.Error.Error(),
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, students)
+
 }
 
 func GetStudentByID(c *gin.Context) {
@@ -23,25 +40,26 @@ func GetStudentByID(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Id Inválido",
+			"message": "ID inválido",
 		})
 
 		return
 	}
 
+	db := config.DBConnection()
 	var student studentModel.Student
+	result := db.First(&student, id)
 
-	for _, s := range Students {
-		if s.ID == id {
-			student = s
-			break
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"message": "Aluno não encontrado",
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Erro ao encontrar aluno",
+			})
 		}
-	}
-
-	if student.ID == 0 {
-		c.JSON(http.StatusNotFound, gin.H{
-			"message": "Aluno não encontrado",
-		})
 
 		return
 	}
@@ -80,9 +98,9 @@ func PostStudent(c *gin.Context) {
 		return
 	}
 
-	Students = append(Students, student)
-
-	c.JSON(http.StatusOK, student)
+	db := config.DBConnection()
+	result := db.Create(&student)
+	c.JSON(http.StatusOK, result)
 
 }
 
@@ -102,29 +120,30 @@ func PutStudent(c *gin.Context) {
 		return
 	}
 
-	for index, student := range Students {
-		if student.ID == id {
-
-			if reqStudent.Name != "" {
-				Students[index].Name = reqStudent.Name
-			}
-			if reqStudent.Age != 0 {
-				Students[index].Age = reqStudent.Age
-			}
-			if len(reqStudent.Classes) > 0 {
-				Students[index].Classes = reqStudent.Classes
-			}
-			if reqStudent.Course != "" {
-				Students[index].Course = reqStudent.Course
-			}
-
-			c.JSON(http.StatusOK, Students)
-			return
-		}
-	}
+	fmt.Print(id)
 
 	c.JSON(http.StatusNotFound, gin.H{
 		"message": "Estudante não encontrado",
 	})
 
+}
+
+func DeleteStudent(c *gin.Context) {
+	idrStr := c.Param("id")
+
+	id, err := strconv.Atoi(idrStr)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "ID Inválido",
+		})
+
+		return
+	}
+
+	if id > 0 && id < len(Students) {
+		Students = append(Students[:id], Students[id+1:]...)
+	}
+
+	c.JSON(http.StatusOK, Students)
 }
