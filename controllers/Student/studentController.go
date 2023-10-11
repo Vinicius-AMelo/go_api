@@ -100,7 +100,16 @@ func PostStudent(c *gin.Context) {
 
 	db := config.DBConnection()
 	result := db.Create(&student)
-	c.JSON(http.StatusOK, result)
+
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Erro ao criar aluno",
+			"error":   result.Error.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, student)
 
 }
 
@@ -129,6 +138,7 @@ func PutStudent(c *gin.Context) {
 }
 
 func DeleteStudent(c *gin.Context) {
+	var student studentModel.Student
 	idrStr := c.Param("id")
 
 	id, err := strconv.Atoi(idrStr)
@@ -141,8 +151,10 @@ func DeleteStudent(c *gin.Context) {
 		return
 	}
 
-	if id > 0 && id < len(Students) {
-		Students = append(Students[:id], Students[id+1:]...)
+	if id > 0 {
+		db := config.DBConnection()
+		result := db.Unscoped().Delete(&student, id)
+		c.JSON(http.StatusOK, result)
 	}
 
 	c.JSON(http.StatusOK, Students)
