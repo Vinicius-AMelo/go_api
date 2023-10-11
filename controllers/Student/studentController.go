@@ -132,7 +132,7 @@ func PutStudent(c *gin.Context) {
 	fmt.Print(id)
 
 	c.JSON(http.StatusNotFound, gin.H{
-		"message": "Estudante não encontrado",
+		"message": "Estudante não encontrado!",
 	})
 
 }
