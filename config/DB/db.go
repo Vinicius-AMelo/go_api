@@ -22,18 +22,20 @@ var ConnectionConfig connection
 
 func init() {
 	ConnectionConfig = connection{
-		Host:     getEnv("DB_HOST", "localhost"),
-		User:     getEnv("DB_USER", "vini"),
-		Password: getEnv("DB_PASSWORD", "vini"),
-		Database: getEnv("DB_DATABASE", "go"),
-		Port:     getEnv("DB_PORT", "5432"),
+		Host:     getEnv("PGHOST", "localhost"),
+		User:     getEnv("PGUSER", "vini"),
+		Password: getEnv("PGPASSWORD", "vini"),
+		Database: getEnv("PGDATABASE", "go"),
+		Port:     getEnv("PGPORT", "5432"),
 	}
 }
 
 func getEnv(key, fallback string) string {
 	if value, exists := os.LookupEnv(key); exists {
+		fmt.Printf("Variável de ambiente %s encontrada. Valor: %s\n", key, value)
 		return value
 	}
+	fmt.Printf("Variável de ambiente %s não encontrada. Usando valor padrão: %s\n", key, fallback)
 	return fallback
 }
 
