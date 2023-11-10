@@ -32,10 +32,8 @@ func init() {
 
 func getEnv(key, fallback string) string {
 	if value, exists := os.LookupEnv(key); exists {
-		fmt.Printf("Variável de ambiente %s encontrada. Valor: %s\n", key, value)
 		return value
 	}
-	fmt.Printf("Variável de ambiente %s não encontrada. Usando valor padrão: %s\n", key, fallback)
 	return fallback
 }
 
