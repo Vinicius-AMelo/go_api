@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	envVarValue := os.Getenv("port")
+	envVarValue := os.Getenv("PORT")
 
 	// Se a variável de ambiente estiver vazia, atribua um valor padrão "5000".
 	if envVarValue == "" {
