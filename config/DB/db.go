@@ -4,6 +4,8 @@ import (
 	"fmt"
 	studentModel "student_api/models/Student"
 
+	"os"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -20,12 +22,19 @@ var ConnectionConfig connection
 
 func init() {
 	ConnectionConfig = connection{
-		Host:     "localhost",
-		User:     "vini",
-		Password: "vini",
-		Database: "go",
-		Port:     "5432",
+		Host:     getEnv("DB_HOST", "localhost"),
+		User:     getEnv("DB_USER", "vini"),
+		Password: getEnv("DB_PASSWORD", "vini"),
+		Database: getEnv("DB_DATABASE", "go"),
+		Port:     getEnv("DB_PORT", "5432"),
 	}
+}
+
+func getEnv(key, fallback string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return fallback
 }
 
 func DBConnection() *gorm.DB {
