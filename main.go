@@ -9,7 +9,6 @@ import (
 )
 
 func main() {
-
 	envVarValue := os.Getenv("port")
 
 	// Se a variável de ambiente estiver vazia, atribua um valor padrão "5000".
@@ -25,5 +24,5 @@ func main() {
 	app.PUT("/students/:id", studentController.PutStudent)
 	app.DELETE("/students/:id", studentController.DeleteStudent)
 
-	app.Run(fmt.Sprintf(":%d", envVarValue))
+	app.Run(fmt.Sprintf(":%s", envVarValue))
 }
